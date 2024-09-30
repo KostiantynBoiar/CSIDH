@@ -34,11 +34,13 @@ def j_invariant(a, b):
     answ = numerator / denominator
     return answ
     
-# Перевірка на суперсингулярність: якщо j-інваріант належить до поля Fp2
 def is_supersingular_curve(a, b):
-    E = EllipticCurve(F, [a, b])  # Еліптична крива y^2 = x^3 + ax + b
-    num_points = E.order()  # Кількість точок на кривій E над F_p
-    return num_points == p + 1
+    # Define the elliptic curve over Fp2
+    E = EllipticCurve(F, [a, b])  # Elliptic curve y^2 = x^3 + ax + b over Fp2
+    
+    # Use SageMath's built-in function to check if the curve is supersingular
+    return E.is_supersingular()
+
 
 def is_singular_curve(a, b):
     # Compute the discriminant: -16(4a^3 + 27b^2)
@@ -47,6 +49,7 @@ def is_singular_curve(a, b):
     # If the discriminant is zero, the curve is singular
     return discriminant == 0
 
+# Function to find valid parameter 'a' for the elliptic curve using consistent values for a and b
 def find_valid_a():
     
     points = []  # Stores j-invariant values
@@ -54,31 +57,34 @@ def find_valid_a():
     i = 0
     j_count = count_of_j(p)  # Get the number of j-invariants needed
     
-    while i < j_count:  # Repeat until enough j-invariants are found
-        # Generate random elements from the field Fp2
-        u = F.random_element()
-        v = F.random_element()
-        a = u
-        b = v
-        
-        # Check if the curve is singular
-        if is_singular_curve(a, b):
-            print("Singular curve detected, skipping this pair.")
-            continue
-        
-        # Compute j-invariant
-        j = j_invariant(a, b)
-        # If j is None, skip to the next iteration
-        if j is None:
-            continue
-        
-        # Check if the curve is not supersingular
-        if not is_supersingular_curve(a, b):
-            a_params.append(a)
-            points.append(j)
-            print("Supersingular curve detected, ", j)
-            i += 1  # Increment counter for each valid pair
+    # Iterate over all possible values of 'a' and 'b' in the field Fp2
+    for a in F:
+        for b in F:
+            # Check if the curve is singular
+            if is_singular_curve(a, b):
+                print("Singular curve detected, skipping this pair.")
+                continue
             
+            # Compute j-invariant
+            j = j_invariant(a, b)
+            
+            # If j is None, skip to the next iteration
+            if j is None:
+                continue
+            
+            # Check if the curve is supersingular
+            if is_supersingular_curve(a, b):
+
+                if j not in points:
+                    a_params.append(f'{a}, {b}')
+                    points.append(j)
+                    print("Supersingular curve detected, j-invariant:", j)
+                    i += 1  # Increment counter for each valid pair
+                
+                # Break the loop if the required number of j-invariants is found
+                if i >= j_count:
+                    return a_params, points
+
     return a_params, points
 
 # Use the function to find valid 'a' and j-invariant values
@@ -87,3 +93,5 @@ a_params, j_invariants = find_valid_a()
 # Output the result
 print("Знайдені параметри a:", a_params)
 print("j-інваріанти кривої:", j_invariants)
+print("Count of j-invariants: ", len(j_invariants))
+
