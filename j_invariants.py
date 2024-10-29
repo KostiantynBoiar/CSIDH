@@ -1,3 +1,4 @@
+#sage -python {name_of_the_file.py}
 from sage.all import *
 # Введіть значення простого числа p
 p = 241
@@ -53,10 +54,9 @@ def is_singular_curve(a, b):
 def find_valid_a():
     
     points = []  # Stores j-invariant values
-    a_params = []  # Stores valid 'a' parameters
     i = 0
     j_count = count_of_j(p)  # Get the number of j-invariants needed
-    
+    params = []
     # Iterate over all possible values of 'a' and 'b' in the field Fp2
     for a in F:
         for b in F:
@@ -76,22 +76,44 @@ def find_valid_a():
             if is_supersingular_curve(a, b):
 
                 if j not in points:
-                    a_params.append(f'{a}, {b}')
+                    a_b_params = a, b
+                    params.append(a_b_params)
                     points.append(j)
                     print("Supersingular curve detected, j-invariant:", j)
                     i += 1  # Increment counter for each valid pair
                 
                 # Break the loop if the required number of j-invariants is found
                 if i >= j_count:
-                    return a_params, points
+                    return params, points
 
-    return a_params, points
+    return params, points
+
+
+def kernel_of_isogeny(E, n):
+    
+    print([P.xy() for P in E if P.order() == 13])
+
 
 # Use the function to find valid 'a' and j-invariant values
-a_params, j_invariants = find_valid_a()
-
+params, j_invariants = find_valid_a()
+E = EllipticCurve(F, (params[0][0], params[0][1]))
 # Output the result
-print("Знайдені параметри a:", a_params)
+print("Знайдені параметри a:", params)
+print("Знайдені параметри b:", params[1][0])
 print("j-інваріанти кривої:", j_invariants)
 print("Count of j-invariants: ", len(j_invariants))
+print(kernel_of_isogeny(E, 3))
 
+
+i = I  # уявна одиниця
+a_prime = var('a_prime')  # змінна для a'
+
+# Формула для j-інваріанта еліптичної кривої Монтгомері
+j_invariant_formula = 256 * ((1 - 3 * a_prime**2)**3) / (a_prime**2 - 1)
+
+# Заданий j-інваріант для нової кривої
+j_target = 74 * i + 50
+
+# Розв'язуємо рівняння для a' в термінах заданого j-інваріанта
+a_prime_solutions = solve(j_invariant_formula == j_target, a_prime)
+print(a_prime_solutions)
