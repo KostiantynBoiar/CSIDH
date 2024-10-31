@@ -6,6 +6,7 @@ p = 241
 # Поле Fp2
 F = GF(p**2, 'i')
 i = F.gen()  # Уявна одиниця
+CC = ComplexField(100)
 
 def count_of_j(p):
     count = int(p/12)
@@ -53,7 +54,7 @@ def is_singular_curve(a, b):
 # Function to find valid parameter 'a' for the elliptic curve using consistent values for a and b
 def find_valid_a():
     
-    points = []  # Stores j-invariant values
+    points = []  # Stores CC = ComplexField(100)j-invariant values
     i = 0
     j_count = count_of_j(p)  # Get the number of j-invariants needed
     params = []
@@ -90,30 +91,54 @@ def find_valid_a():
 
 
 def kernel_of_isogeny(E, n):
+
+    kernel_points = []
     
-    print([P.xy() for P in E if P.order() == 13])
+    # Iterate through points on E to find those with order dividing n
+    for P in E:
+        if P.order() == n:
+            kernel_points.append(P.xy())  # Append the point's coordinates
+
+    return kernel_points
+
+
+    
+def j_invariant_param():
+    # Define the complex parameter in the expression
+    complex_term = CC(sqrt(43700 * I + 22871) + 115 * I + 190)
+    
+    # Compute the coefficient a = 2 - complex_term^2
+    a = 2 - complex_term**2
+    b = 1  # As per your equation, the constant term with x is simply 'x'
+
+    # Define the elliptic curve
+    E = EllipticCurve([a, b])
+
+    # Check if the curve is singular
+    if is_singular_curve(a, b):
+        print("The curve is singular for the given parameter.")
+        return None
+
+    # Compute the j-invariant
+    j = j_invariant(a, b)
+    return j
+
+# Example usage
+
+
+
+j_value = j_invariant_param()
+print("Computed j-invariant:", j_value)
 
 
 # Use the function to find valid 'a' and j-invariant values
 params, j_invariants = find_valid_a()
 E = EllipticCurve(F, (params[0][0], params[0][1]))
+
 # Output the result
 print("Знайдені параметри a:", params)
 print("Знайдені параметри b:", params[1][0])
 print("j-інваріанти кривої:", j_invariants)
 print("Count of j-invariants: ", len(j_invariants))
-print(kernel_of_isogeny(E, 3))
 
-
-i = I  # уявна одиниця
-a_prime = var('a_prime')  # змінна для a'
-
-# Формула для j-інваріанта еліптичної кривої Монтгомері
-j_invariant_formula = 256 * ((1 - 3 * a_prime**2)**3) / (a_prime**2 - 1)
-
-# Заданий j-інваріант для нової кривої
-j_target = 74 * i + 50
-
-# Розв'язуємо рівняння для a' в термінах заданого j-інваріанта
-a_prime_solutions = solve(j_invariant_formula == j_target, a_prime)
-print(a_prime_solutions)
+print("Kernel of isogeny: ", kernel_of_isogeny(E, 2))
