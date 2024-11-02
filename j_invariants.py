@@ -107,7 +107,7 @@ def kernel_of_isogeny(E, n):
     
 def j_invariant_param():
     # Define the complex parameter in the expression
-    complex_term = CC(-142554-53760*I)
+    complex_term = CC(2154679+876288*I)
     
     # Compute the coefficient a = 2 - complex_term^2
     a = 2 - complex_term**2
@@ -143,7 +143,11 @@ print("Знайдені параметри ", params)
 print("j-інваріанти кривої:", j_invariants)
 print("Count of j-invariants: ", len(j_invariants))
 
+ker_3 = kernel_of_isogeny(E, 3)
+ker_2 = kernel_of_isogeny(E, 2)
 print(f"Params of the isogeny for the kernel: a = {a_param}, b = {b_param}")
-print("Kernel of isogeny [2]ker: ", kernel_of_isogeny(E, 2))
-print("Kernel of isogeny [3]ker: ", kernel_of_isogeny(E, 3))
+print("Kernel of isogeny [2]ker: ", ker_3)
+print("Kernel of isogeny [3]ker: ", ker_2)
 
+print("Computed j-invariant for ker[3]: ", j_invariant((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
+print("Computed j-invariant for ker[2]: ", j_invariant(2*(1-2*(15*i + 26)**2), i))
