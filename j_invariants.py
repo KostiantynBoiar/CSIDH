@@ -59,8 +59,8 @@ def find_valid_a():
     j_count = count_of_j(p)  # Get the number of j-invariants needed
     params = []
     # Iterate over all possible values of 'a' and 'b' in the field Fp2
-    for a in F:
-        for b in F:
+    for b in F:
+        for a in F:
             # Check if the curve is singular
             if is_singular_curve(a, b):
                 print("Singular curve detected, skipping this pair.")
@@ -81,6 +81,8 @@ def find_valid_a():
                     params.append(a_b_params)
                     points.append(j)
                     print("Supersingular curve detected, j-invariant:", j)
+                    print("a param: ", a)
+                    print("b param: ", b)
                     i += 1  # Increment counter for each valid pair
                 
                 # Break the loop if the required number of j-invariants is found
@@ -105,7 +107,7 @@ def kernel_of_isogeny(E, n):
     
 def j_invariant_param():
     # Define the complex parameter in the expression
-    complex_term = CC(sqrt(43700 * I + 22871) + 115 * I + 190)
+    complex_term = CC(-142554-53760*I)
     
     # Compute the coefficient a = 2 - complex_term^2
     a = 2 - complex_term**2
@@ -125,20 +127,23 @@ def j_invariant_param():
 
 # Example usage
 
-
-
 j_value = j_invariant_param()
 print("Computed j-invariant:", j_value)
 
 
+
 # Use the function to find valid 'a' and j-invariant values
 params, j_invariants = find_valid_a()
-E = EllipticCurve(F, (params[0][0], params[0][1]))
+a_param = params[16][0]
+b_param = params[16][1]
+E = EllipticCurve(F, (a_param, b_param))
 
 # Output the result
-print("Знайдені параметри a:", params)
-print("Знайдені параметри b:", params[1][0])
+print("Знайдені параметри ", params)
 print("j-інваріанти кривої:", j_invariants)
 print("Count of j-invariants: ", len(j_invariants))
 
-print("Kernel of isogeny: ", kernel_of_isogeny(E, 2))
+print(f"Params of the isogeny for the kernel: a = {a_param}, b = {b_param}")
+print("Kernel of isogeny [2]ker: ", kernel_of_isogeny(E, 2))
+print("Kernel of isogeny [3]ker: ", kernel_of_isogeny(E, 3))
+
