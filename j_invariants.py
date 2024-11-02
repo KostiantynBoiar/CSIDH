@@ -104,34 +104,6 @@ def kernel_of_isogeny(E, n):
     return kernel_points
 
 
-    
-def j_invariant_param():
-    # Define the complex parameter in the expression
-    complex_term = CC(2154679+876288*I)
-    
-    # Compute the coefficient a = 2 - complex_term^2
-    a = 2 - complex_term**2
-    b = 1  # As per your equation, the constant term with x is simply 'x'
-
-    # Define the elliptic curve
-    E = EllipticCurve([a, b])
-
-    # Check if the curve is singular
-    if is_singular_curve(a, b):
-        print("The curve is singular for the given parameter.")
-        return None
-
-    # Compute the j-invariant
-    j = j_invariant(a, b)
-    return j
-
-# Example usage
-
-j_value = j_invariant_param()
-print("Computed j-invariant:", j_value)
-
-
-
 # Use the function to find valid 'a' and j-invariant values
 params, j_invariants = find_valid_a()
 a_param = params[16][0]
@@ -149,5 +121,7 @@ print(f"Params of the isogeny for the kernel: a = {a_param}, b = {b_param}")
 print("Kernel of isogeny [2]ker: ", ker_2)
 print("Kernel of isogeny [3]ker: ", ker_3)
 
+print("Curve is supersingular? ", is_supersingular_curve((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
 print("Computed j-invariant for ker[3]: ", j_invariant((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
-print("Computed j-invariant for ker[2]: ", j_invariant(2*(1-2*(15*i + 26)**2), i))
+print("Curve is supersingular? ", is_supersingular_curve(1802 +3120*i, i))
+print("Computed j-invariant for ker[2]: ", j_invariant(1802 +3120*i, i))
