@@ -25,9 +25,13 @@ def count_of_j(p):
     
     
 def j_invariant(a, b):
+    
     numerator = 1728 * (4 * a**3)
     denominator = 4 * a**3 + 27 * b**2
-    
+    """
+    numerator = 256*(a**2-3)**3
+    denominator = (a**2-4)
+    """
     # Check if the denominator is zero
     if denominator == 0:
         print("Denominator is zero, cannot compute j-invariant for this a, b")
@@ -104,6 +108,8 @@ def kernel_of_isogeny(E, n):
     return kernel_points
 
 
+
+
 # Use the function to find valid 'a' and j-invariant values
 params, j_invariants = find_valid_a()
 a_param = params[16][0]
@@ -115,13 +121,27 @@ print("Знайдені параметри ", params)
 print("j-інваріанти кривої:", j_invariants)
 print("Count of j-invariants: ", len(j_invariants))
 
-ker_3 = kernel_of_isogeny(E, 3)
+#ker_3 = kernel_of_isogeny(E, 3)
 ker_2 = kernel_of_isogeny(E, 2)
 print(f"Params of the isogeny for the kernel: a = {a_param}, b = {b_param}")
 print("Kernel of isogeny [2]ker: ", ker_2)
-print("Kernel of isogeny [3]ker: ", ker_3)
+#print("Kernel of isogeny [3]ker: ", ker_3)
 
-print("Curve is supersingular? ", is_supersingular_curve((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
-print("Computed j-invariant for ker[3]: ", j_invariant((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
-print("Curve is supersingular? ", is_supersingular_curve(1802 +3120*i, i))
-print("Computed j-invariant for ker[2]: ", j_invariant(1802 +3120*i, i))
+
+#print("Curve is supersingular? ", is_supersingular_curve((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
+#print("Computed j-invariant for ker[3]: ", j_invariant((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
+
+def find_j_inv_for_particular_curve(a_param, b_param):
+    E = EllipticCurve(F, (a_param, b_param))
+    for b in F:
+        j_inv = j_invariant(a_param, b)
+        if j_inv in j_invariants:
+            return j_inv
+        else: 
+            continue
+    return -1
+
+print("Computer j-inv for a = 93i+143: ", find_j_inv_for_particular_curve(93*i + 143, i))
+print("Computed j-invariant for ker[2]: ", find_j_inv_for_particular_curve(1802 +3120*i, i))
+print("Computed j-invariant for a = 126i + 132: ", find_j_inv_for_particular_curve(126*i + 132, i))
+print("Computed j-invariant for ker[3]: ", find_j_inv_for_particular_curve(2154679+876288*i, i))
