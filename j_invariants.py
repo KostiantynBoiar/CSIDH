@@ -15,17 +15,11 @@ f = x**2 - 3*x + 7
 
 # Define the extension field Fp2 as Fp[x]/(x^2 - 3x + 7)
 F = Fp.extension(f, 'a')
-"""
-F = GF(p**2, 'i')
-i_F = F.gen()  # Уявна одиниця
-i = i_F*i_F+1
-CC = ComplexField(100)
-"""
+
 def count_of_j(p):
     count = int(p/12)
     mod_p = p % 12
     mod_count = 0
-    answ = 0
     if mod_p == 1:
        mod_count = 0
     elif mod_p == 5 or mod_p == 7:
@@ -114,17 +108,7 @@ def find_valid_a():
 
 
 def kernel_of_isogeny(E, n):
-    """
-    Finds the kernel of the multiplication-by-n isogeny on an elliptic curve.
-    
-    Parameters:
-        E (EllipticCurve): The elliptic curve defined over Fp2.
-        n (int): The order of the isogeny (n-torsion points).
 
-    Returns:
-        list: Points in the kernel of the n-isogeny.
-    """
-    # Calculate the n-torsion points
     kernel_points = []
     for P in E:
         if n*P==E(0):
@@ -154,7 +138,7 @@ print("Kernel of isogeny [2]ker: ", ker_2)
 print("Kernel of isogeny [3]ker: ", ker_3)
 """
 
-print("kernel of isogeny ", kernel_of_isogeny(E, 3))
+print("kernel of isogeny ", kernel_of_isogeny(E, 5))
 #print("Curve is supersingular? ", is_supersingular_curve((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
 #print("Computed j-invariant for ker[3]: ", j_invariant((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
 
