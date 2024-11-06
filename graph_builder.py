@@ -1,75 +1,91 @@
 import raylibpy as rl
-from math import sin, cos, radians
+# Define screen dimensions for Full HD
+WIDTH = 1920
+HEIGHT = 1080
 
-# Define screen dimensions
-WIDTH = 800
-HEIGHT = 600
+# Set up grid parameters and scaling factor
+GRID_SIZE = 10  # Base grid size
+scale_factor = 1.0  # Start with a scaling factor of 1 (100%)
 
-# Define a grid size
-GRID_SIZE = 50
-
-# Node structure: a dictionary of nodes with their positions and connections
-nodes = {
-    "218*i + 21": {"pos": (100, 100), "connections": ["218*i + 21", "51*i + 30", "66*i + 39"]},
-    "28": {"pos": (150, 200), "connections": ["196*i + 105", "167*i + 31", "8"]},
-    "86*i + 227": {"pos": (200, 300), "connections": ["167*i + 31", "155*i + 3", "86*i + 227"]},
-    "196*i + 105": {"pos": (250, 150), "connections": ["86*i + 227", "45*i + 211", "8"]},
-    "155*i + 3": {"pos": (300, 100), "connections": ["86*i + 227", "74*i + 50", "86*i + 227"]},
-    "23*i + 193": {"pos": (350, 250), "connections": ["64", "167*i + 31", "175*i + 237"]},
-    "51*i + 30": {"pos": (400, 200), "connections": ["64", "155*i + 3", "8"]},
-    "49*i + 112": {"pos": (450, 300), "connections": ["192*i + 18", "175*i + 237", "192*i + 18"]},
-    "192*i + 18": {"pos": (500, 150), "connections": ["192*i + 18", "167*i + 31", "86*i + 227"]},
-    "190*i + 183": {"pos": (550, 250), "connections": ["28", "167*i + 31", "175*i + 237"]},
-    "45*i + 211": {"pos": (600, 100), "connections": ["218*i + 21", "155*i + 3", "175*i + 237"]},
-    "8": {"pos": (650, 200), "connections": ["86*i + 227", "8", "155*i + 3"]},
-    "175*i + 237": {"pos": (700, 300), "connections": ["66*i + 39", "192*i + 18", "196*i + 105"]},
-    "64": {"pos": (750, 150), "connections": ["155*i + 3", "74*i + 50", "86*i + 227"]},
-    "66*i + 39": {"pos": (800, 250), "connections": ["86*i + 227", "175*i + 237", "86*i + 227"]},
-    "240": {"pos": (100, 400), "connections": ["74*i + 50", "86*i + 227", "74*i + 50"]},
-    "74*i + 50": {"pos": (150, 350), "connections": ["218*i + 21", "8", "66*i + 39"]},
-    "216": {"pos": (200, 450), "connections": ["155*i + 3", "155*i + 3", "74*i + 50"]},
-    "93": {"pos": (250, 400), "connections": ["93", "8", "23*i + 193"]},
-    "167*i + 31": {"pos": (300, 350), "connections": ["74*i + 50", "74*i + 50", "23*i + 193"]}
-}
+# Node structure with relative positioning
+nodes = {'218*a + 21': {'pos': (386, 116), 'connections': ['218*a + 21', '167*a + 31', '23*a + 193', '192*a + 18']}, '28': {'pos': (1322, 837), 'connections': ['28', '8', '192*a + 18', '49*a + 112']}, '86*a + 227': {'pos': (985, 69), 'connections': ['86*a + 227', '8', '66*a + 39', '196*a + 105']}, '196*a + 105': {'pos': (1018, 232), 'connections': ['196*a + 105', '167*a + 31', '86*a + 227', '190*a + 183']}, '155*a + 3': {'pos': (174, 562), 'connections': ['155*a + 3', '45*a + 211', '8', '175*a + 237']}, '23*a + 193': {'pos': (1525, 825), 'connections': ['23*a + 193', '218*a + 21', '74*a + 50', '49*a + 112']}, '51*a + 30': {'pos': (1031, 508), 'connections': ['51*a + 30', '45*a + 211', '93', '216']}, '49*a + 112': {'pos': (139, 906), 'connections': ['49*a + 112', '23*a + 193', '192*a + 18', '28']}, '192*a + 18': {'pos': (1056, 271), 'connections': ['192*a + 18', '28', '49*a + 112', '218*a + 21']}, '190*a + 183': {'pos': (302, 174), 'connections': ['190*a + 183', '196*a + 105', '93', '216']}, '45*a + 211': {'pos': (865, 738), 'connections': ['45*a + 211', '51*a + 30', '74*a + 50', '155*a + 3']}, '8': {'pos': (488, 649), 'connections': ['8', '28', '155*a + 3', '86*a + 227']}, '175*a + 237': {'pos': (1178, 250), 'connections': ['175*a + 237', '66*a + 39', '155*a + 3', '64']}, '64': {'pos': (925, 591), 'connections': ['64', '216', '175*a + 237', '66*a + 39']}, '66*a + 39': {'pos': (906, 316), 'connections': ['66*a + 39', '64', '175*a + 237', '86*a + 227']}, '240': {'pos': (1522, 298), 'connections': ['240', '240', '240', '93']}, '74*a + 50': {'pos': (1241, 534), 'connections': ['74*a + 50', '45*a + 211', '23*a + 193', '167*a + 31']}, '216': {'pos': (1448, 765), 'connections': ['216', '64', '51*a + 30', '190*a + 183']}, '93': {'pos': (1156, 894), 'connections': ['93', '240', '51*a + 30', '190*a + 183']}, '167*a + 31': {'pos': (1429, 61), 'connections': ['167*a + 31', '218*a + 21', '74*a + 50', '196*a + 105']}}
 
 
-# Initialize raylib
-rl.init_window(WIDTH, HEIGHT, "Simple Graph Builder")
+scroll_offset_x, scroll_offset_y = 0, 0
+
+rl.init_window(WIDTH, HEIGHT, "Scalable and Scrollable Graph Builder")
 rl.set_target_fps(60)
 
 def draw_grid():
-    for x in range(0, WIDTH, GRID_SIZE):
+    """Draw grid lines with scaling and scrolling offsets."""
+    scaled_grid_size = int(GRID_SIZE * scale_factor)
+    # Adjust grid starting points based on scroll offset and scale factor
+    start_x = -scroll_offset_x % scaled_grid_size
+    start_y = -scroll_offset_y % scaled_grid_size
+    
+    for x in range(start_x, WIDTH, scaled_grid_size):
         rl.draw_line(x, 0, x, HEIGHT, rl.LIGHTGRAY)
-    for y in range(0, HEIGHT, GRID_SIZE):
+    for y in range(start_y, HEIGHT, scaled_grid_size):
         rl.draw_line(0, y, WIDTH, y, rl.LIGHTGRAY)
 
 def draw_nodes():
+    """Draw each node as a circle with its label, with scaling and scrolling."""
     for node, data in nodes.items():
+        # Scale and apply scroll offsets to node position
+        x = int(data["pos"][0] * scale_factor) + scroll_offset_x
+        y = int(data["pos"][1] * scale_factor) + scroll_offset_y
+        
         # Draw the node as a circle
-        x, y = data["pos"]
-        rl.draw_circle(x, y, 10, rl.BLUE)
-        # Draw the text inside the node
-        rl.draw_text(node, x - 10, y - 25, 10, rl.DARKGRAY)
+        rl.draw_circle(x, y, int(10 * scale_factor), rl.BLUE)
+        
+        # Draw the text above the node
+        rl.draw_text(node, x - int(10 * scale_factor), y - int(25 * scale_factor), int(10 * scale_factor), rl.DARKGRAY)
 
 def draw_connections():
+    """Draw lines between connected nodes, with scaling and scrolling."""
     for node, data in nodes.items():
-        x1, y1 = data["pos"]
+        # Scale and apply scroll offsets to the start node position
+        x1 = int(data["pos"][0] * scale_factor) + scroll_offset_x
+        y1 = int(data["pos"][1] * scale_factor) + scroll_offset_y
         for connection in data["connections"]:
             if connection in nodes:
-                x2, y2 = nodes[connection]["pos"]
-                # Draw line to connected node
+                # Scale and apply scroll offsets to the connected node position
+                x2 = int(nodes[connection]["pos"][0] * scale_factor) + scroll_offset_x
+                y2 = int(nodes[connection]["pos"][1] * scale_factor) + scroll_offset_y
+                # Draw a line to the connected node
                 rl.draw_line(x1, y1, x2, y2, rl.RED)
 
 # Main loop
 while not rl.window_should_close():
+    # Handle zoom controls (mouse wheel up to zoom in, down to zoom out)
+    mouse_wheel_move = rl.get_mouse_wheel_move()
+   
+    # Scroll controls with arrow keys
+    if rl.is_key_down(rl.KEY_RIGHT):
+        scroll_offset_x -= 15
+    if rl.is_key_down(rl.KEY_LEFT):
+        scroll_offset_x += 15
+    if rl.is_key_down(rl.KEY_DOWN):
+        scroll_offset_y -= 15
+    if rl.is_key_down(rl.KEY_UP):
+        scroll_offset_y += 15
+
+    # Zoom in or out
+    if mouse_wheel_move > 0:
+        scale_factor *= 1.1  # Zoom in
+    elif mouse_wheel_move < 0:
+        scale_factor *= 0.9  # Zoom out
+    
+    # Begin drawing
     rl.begin_drawing()
     rl.clear_background(rl.RAYWHITE)
-
-    # Draw grid, nodes, and connections
+    
+    # Draw grid, nodes, and connections with scaling and scrolling
     draw_grid()
     draw_connections()
     draw_nodes()
-
+    
+    # End drawing
     rl.end_drawing()
 
 # Cleanup raylib

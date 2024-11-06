@@ -1,13 +1,26 @@
 #sage -python {name_of_the_file.py}
 from sage.all import *
 # Введіть значення простого числа p
+var('i')
 p = 241
+Fp = GF(p)
+S = SupersingularModule(Integer(p))
+L,d = S.supersingular_points()
+# Define the polynomial ring over Fp with generator x
+R = PolynomialRing(Fp, 'x')
+x = R.gen()
 
-# Поле Fp2
+# Define the irreducible polynomial for the extension
+f = x**2 - 3*x + 7
+
+# Define the extension field Fp2 as Fp[x]/(x^2 - 3x + 7)
+F = Fp.extension(f, 'a')
+"""
 F = GF(p**2, 'i')
-i = F.gen()  # Уявна одиниця
+i_F = F.gen()  # Уявна одиниця
+i = i_F*i_F+1
 CC = ComplexField(100)
-
+"""
 def count_of_j(p):
     count = int(p/12)
     mod_p = p % 12
@@ -27,7 +40,7 @@ def count_of_j(p):
 def j_invariant(a, b):
     
     numerator = 1728 * (4 * a**3)
-    denominator = 4 * a**3 + 27 * b**2
+    denominator = 4 * a**3 + 27 * b**2 
     """
     numerator = 256*(a**2-3)**3
     denominator = (a**2-4)
@@ -37,15 +50,23 @@ def j_invariant(a, b):
         print("Denominator is zero, cannot compute j-invariant for this a, b")
         return None  # or return some default value
     
-    answ = numerator / denominator
+    answ =  numerator / denominator
     return answ
-    
-def is_supersingular_curve(a, b):
+
+
+def j_invariants_over_F(F):
+    X = PolynomialRing(F, 'x').gen()
+
+    j_in = supersingular_j(F)
+    print(j_in)
+
+    poly = sage.modular.ssmod.ssmod.Phi_polys(2,X,j_in)
+
+    print(poly.roots())
+
+def is_supersingular_curve(j):
     # Define the elliptic curve over Fp2
-    E = EllipticCurve(F, [a, b])  # Elliptic curve y^2 = x^3 + ax + b over Fp2
-    
-    # Use SageMath's built-in function to check if the curve is supersingular
-    return E.is_supersingular()
+    return j in L
 
 
 def is_singular_curve(a, b):
@@ -65,10 +86,6 @@ def find_valid_a():
     # Iterate over all possible values of 'a' and 'b' in the field Fp2
     for b in F:
         for a in F:
-            # Check if the curve is singular
-            if is_singular_curve(a, b):
-                print("Singular curve detected, skipping this pair.")
-                continue
             
             # Compute j-invariant
             j = j_invariant(a, b)
@@ -78,7 +95,7 @@ def find_valid_a():
                 continue
             
             # Check if the curve is supersingular
-            if is_supersingular_curve(a, b):
+            if is_supersingular_curve(j):
 
                 if j not in points:
                     a_b_params = a, b
@@ -97,37 +114,47 @@ def find_valid_a():
 
 
 def kernel_of_isogeny(E, n):
-
-    kernel_points = []
+    """
+    Finds the kernel of the multiplication-by-n isogeny on an elliptic curve.
     
-    # Iterate through points on E to find those with order dividing n
+    Parameters:
+        E (EllipticCurve): The elliptic curve defined over Fp2.
+        n (int): The order of the isogeny (n-torsion points).
+
+    Returns:
+        list: Points in the kernel of the n-isogeny.
+    """
+    # Calculate the n-torsion points
+    kernel_points = []
     for P in E:
-        if P.order() == n:
-            kernel_points.append(P.xy())  # Append the point's coordinates
-
+        if n*P==E(0):
+            kernel_points.append(P)
+    print(len(kernel_points))
     return kernel_points
+    
 
 
+j_invariants_over_F(F)
 
-
+print(L)
 # Use the function to find valid 'a' and j-invariant values
 params, j_invariants = find_valid_a()
 a_param = params[16][0]
 b_param = params[16][1]
 E = EllipticCurve(F, (a_param, b_param))
-
 # Output the result
 print("Знайдені параметри ", params)
 print("j-інваріанти кривої:", j_invariants)
 print("Count of j-invariants: ", len(j_invariants))
-
-#ker_3 = kernel_of_isogeny(E, 3)
+"""
+ker_3 = kernel_of_isogeny(E, 3)
 ker_2 = kernel_of_isogeny(E, 2)
 print(f"Params of the isogeny for the kernel: a = {a_param}, b = {b_param}")
 print("Kernel of isogeny [2]ker: ", ker_2)
-#print("Kernel of isogeny [3]ker: ", ker_3)
+print("Kernel of isogeny [3]ker: ", ker_3)
+"""
 
-
+print("kernel of isogeny ", kernel_of_isogeny(E, 3))
 #print("Curve is supersingular? ", is_supersingular_curve((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
 #print("Computed j-invariant for ker[3]: ", j_invariant((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
 
@@ -140,8 +167,3 @@ def find_j_inv_for_particular_curve(a_param, b_param):
         else: 
             continue
     return -1
-
-print("Computer j-inv for a = 93i+143: ", find_j_inv_for_particular_curve(93*i + 143, i))
-print("Computed j-invariant for ker[2]: ", find_j_inv_for_particular_curve(1802 +3120*i, i))
-print("Computed j-invariant for a = 126i + 132: ", find_j_inv_for_particular_curve(126*i + 132, i))
-print("Computed j-invariant for ker[3]: ", find_j_inv_for_particular_curve(2154679+876288*i, i))
