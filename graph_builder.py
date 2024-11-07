@@ -24,11 +24,15 @@ def draw_grid():
     # Adjust grid starting points based on scroll offset and scale factor
     start_x = -scroll_offset_x % scaled_grid_size
     start_y = -scroll_offset_y % scaled_grid_size
-    
+    i = 0
+    grid_line_colours = [rl.WHITE, rl.LIGHTGRAY]
+    if rl.is_key_down(rl.KEY_ENTER):
+        i = 1 - i
+        
     for x in range(start_x, WIDTH, scaled_grid_size):
-        rl.draw_line(x, 0, x, HEIGHT, rl.LIGHTGRAY)
+        rl.draw_line(x, 0, x, HEIGHT, grid_line_colours[i])
     for y in range(start_y, HEIGHT, scaled_grid_size):
-        rl.draw_line(0, y, WIDTH, y, rl.LIGHTGRAY)
+        rl.draw_line(0, y, WIDTH, y, grid_line_colours[i])
 
 def draw_nodes():
     """Draw each node as a circle with its label, with scaling and scrolling."""
@@ -41,7 +45,7 @@ def draw_nodes():
         rl.draw_circle(x, y, int(10 * scale_factor), rl.BLUE)
         
         # Draw the text above the node
-        rl.draw_text(node, x - int(10 * scale_factor), y - int(25 * scale_factor), int(10 * scale_factor), rl.DARKGRAY)
+        rl.draw_text(node, x - int(10 * scale_factor), y - int(27 * scale_factor), int(20 * scale_factor), rl.DARKGRAY)
 
 def draw_connections():
     """Draw lines between connected nodes, with scaling and scrolling."""

@@ -130,13 +130,6 @@ E = EllipticCurve(F, (a_param, b_param))
 print("Знайдені параметри ", params)
 print("j-інваріанти кривої:", j_invariants)
 print("Count of j-invariants: ", len(j_invariants))
-"""
-ker_3 = kernel_of_isogeny(E, 3)
-ker_2 = kernel_of_isogeny(E, 2)
-print(f"Params of the isogeny for the kernel: a = {a_param}, b = {b_param}")
-print("Kernel of isogeny [2]ker: ", ker_2)
-print("Kernel of isogeny [3]ker: ", ker_3)
-"""
 
 print("kernel of isogeny ", kernel_of_isogeny(E, 5))
 #print("Curve is supersingular? ", is_supersingular_curve((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
