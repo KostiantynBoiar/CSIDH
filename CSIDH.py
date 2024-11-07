@@ -1,12 +1,16 @@
 from j_invariants import *
 import random
 
-
 def public_params_generator(param):
     """Generate a supersingular curve and return public parameters."""
     for b in F:
-        E = EllipticCurve(F, (param[1], b))
-        j_inv_of_E = j_invariant(param[1], b)
+        try:
+            E = EllipticCurve(F, (param[0], b))
+            j_inv_of_E = j_invariant(param[0], b)
+        except:
+            E = EllipticCurve(F, (param, b))
+            j_inv_of_E = j_invariant(param, b)
+
         if is_supersingular_curve(j_inv_of_E):
             # Generate two independent points on the same supersingular curve
             P = E.random_point()  # First point
@@ -14,7 +18,77 @@ def public_params_generator(param):
             return E, P, Q  # Return the curve and the two points
     return None, None, None
 
+def find_point_of_order(curve, order):
+    """Find a point on the elliptic curve with the specified order."""
+    while 1:  
+        point = curve.random_point()
+        if point.order() == order:
+            return point
+    return None
+
+
+def compute_isogeny_step(E, S_a, P_B, Q_B, doublings, target_order=2):
+    """Compute a single isogeny step with specified doublings and update points."""
+    # Perform the specified number of doublings on S_a to get R_a
+    R_a = S_a
+    for _ in range(doublings):
+        R_a = R_a * 2
+    
+    # Check if R_a has the correct order
+    if R_a.order() != target_order:
+        print("Error: R_a does not have the correct order to be used as a kernel.")
+        return None, None, None, None
+    
+    # Construct the isogeny with R_a as the kernel
+    isogeny = EllipticCurveIsogeny(E, R_a)
+    E_new = isogeny.codomain()
+    
+    # Apply the isogeny to the points
+    P_B_new = isogeny(P_B)
+    Q_B_new = isogeny(Q_B)
+    S_a_new = isogeny(S_a)
+    
+    print(f"New curve E: {E_new}")
+    print(f"Updated j-invariant: {E_new.j_invariant()}")
+    print(f"Updated points: P_B' = {P_B_new}, Q_B' = {Q_B_new}, S_a' = {S_a_new}")
+    
+    return E_new, S_a_new, P_B_new, Q_B_new
+
+
+def multi_isogeny_steps(E_start, S_a_start, P_B_start, Q_B_start):
+    # Step 1: Compute φ0 with three doublings
+    print("Computing φ0:")
+    E_a1, S_a_prime, P_B_prime, Q_B_prime = compute_isogeny_step(E_start, S_a_start, P_B_start, Q_B_start, doublings=3)
+    
+    # Step 2: Compute φ1 with two doublings
+    print("Computing φ1:")
+    E_a2, S_a_prime, P_B_prime, Q_B_prime = compute_isogeny_step(E_a1, S_a_prime, P_B_prime, Q_B_prime, doublings=2)
+    
+    # Step 3: Compute φ2 with one doubling
+    print("Computing φ2:")
+    E_a3, S_a_prime, P_B_prime, Q_B_prime = compute_isogeny_step(E_a2, S_a_prime, P_B_prime, Q_B_prime, doublings=1)
+    
+    # Step 4: Compute φ3 without additional doublings (S_a_prime should already have order 2)
+    print("Computing φ3:")
+    E_a4, S_a_prime, P_B_prime, Q_B_prime = compute_isogeny_step(E_a3, S_a_prime, P_B_prime, Q_B_prime, doublings=0)
+    
+    return E_a4, S_a_prime, P_B_prime, Q_B_prime
+
+
+def compute_step(E, k, order):
+    print(E.a4())
+    E_C, P_C, Q_C = public_params_generator(E.a4())
+    k_Q = k * Q_C
+    S = P_C + k_Q
+    if S.order() != order:
+        S = find_point_of_order(E_C, 2)
+    S_isogeny = EllipticCurveIsogeny(E_C, S)
+    E_a1 = S_isogeny.codomain()
+    E_a1_j = E_a1.j_invariant()
+    return S_isogeny, E_a1, E_a1_j
+
 def private_key_generation():
+    steps = []
     # Generate public parameters P and Q for Bob and Alice on the same curve
     E_bob, bob_public_p, bob_public_q = public_params_generator(choice(params))
     E_alice, alice_public_p, alice_public_q = public_params_generator(choice(params))
@@ -28,15 +102,36 @@ def private_key_generation():
     print("Alice's public parameters: P_A =", alice_public_p, ", Q_A =", alice_public_q)
     
     # Alice's secret scalar
-    k_A = 11
+    k_0 = 11
     
-    # Perform scalar multiplication [k_A]Q_A on Alice's curve
-    kA_QA = k_A * alice_public_q  # This calculates [k_A]Q_A on the same curve E_alice
-    
-    # Compute S_A as the sum of P_A and [k_A]Q_A, both on the curve E_alice
-    S_a = alice_public_p + kA_QA  # Calculate S_A = P_A + [k_A]Q_A
-    
-    print("S_a parameter:", S_a)
-    return S_a
+    #step 0
+    S_A_isogeny, E_A_a1, E_A_a1_j = compute_step(E_alice, k_0, 2)
+    print(f'Isogeny phi0 = {S_A_isogeny},\n EC_phi0 = {E_A_a1},\n j-inv_phi0 = {E_A_a1_j}')
+    steps.append(E_A_a1_j)
+    #step 1
+    k_1 = 8
 
+    S_A_isogeny_1, E_A_a1_1, E_A_a1_j_1 = compute_step(E_A_a1, k_1, 2)
+    print(f'Isogeny phi1 = {S_A_isogeny_1},\n EC_phi1 = {E_A_a1_1},\n j-inv_phi1 = {E_A_a1_j_1}')
+    steps.append(E_A_a1_j_1)
+
+
+    #step 2
+    k_2 = 4
+
+    S_A_isogeny_2, E_A_a1_2, E_A_a1_j_2 = compute_step(E_A_a1_1, k_2, 2)
+    print(f'Isogeny phi1 = {S_A_isogeny_2},\n EC_phi1 = {E_A_a1_2},\n j-inv_phi1 = {E_A_a1_j_2}')
+    steps.append(E_A_a1_j_2)
+
+
+    #step 3
+    k_3 = 2
+
+    S_A_isogeny_3, E_A_a1_3, E_A_a1_j_3 = compute_step(E_A_a1_2, k_3, 2)
+    print(f'Isogeny phi1 = {S_A_isogeny_3},\n EC_phi1 = {E_A_a1_3},\n j-inv_phi1 = {E_A_a1_j_3}')
+    steps.append(E_A_a1_j_3)
+
+    print("Steps: ", steps)
+
+    
 private_key_generation()
