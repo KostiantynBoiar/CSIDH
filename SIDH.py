@@ -15,6 +15,7 @@ def public_params_generator(param):
             # Generate two independent points on the same supersingular curve
             P = E.random_point()  # First point
             Q = E.random_point()  # Second point, independent of P
+            print(f"Alice E = {E}, param = {param}, j_inv_of_E = {j_inv_of_E}, P = {P}, Q = {Q}")
             return E, P, Q  # Return the curve and the two points
     return None, None, None
 
@@ -27,33 +28,6 @@ def find_point_of_order(curve, order):
             return point
     return None
 
-
-def compute_isogeny_step(E, S_a, P_B, Q_B, doublings, target_order=2):
-    """Compute a single isogeny step with specified doublings and update points."""
-    # Perform the specified number of doublings on S_a to get R_a
-    R_a = S_a
-    for _ in range(doublings):
-        R_a = R_a * 2
-    
-    # Check if R_a has the correct order
-    if R_a.order() != target_order:
-        print("Error: R_a does not have the correct order to be used as a kernel.")
-        return None, None, None, None
-    
-    # Construct the isogeny with R_a as the kernel
-    isogeny = EllipticCurveIsogeny(E, R_a)
-    E_new = isogeny.codomain()
-    
-    # Apply the isogeny to the points
-    P_B_new = isogeny(P_B)
-    Q_B_new = isogeny(Q_B)
-    S_a_new = isogeny(S_a)
-    
-    print(f"New curve E: {E_new}")
-    print(f"Updated j-invariant: {E_new.j_invariant()}")
-    print(f"Updated points: P_B' = {P_B_new}, Q_B' = {Q_B_new}, S_a' = {S_a_new}")
-    
-    return E_new, S_a_new, P_B_new, Q_B_new
 
 
 
@@ -160,6 +134,7 @@ def bob_steps_public_gen():
 
     return steps, bob_PK
 
+
 def public_key_generation():
     steps = []
     # Generate public parameters P and Q for Bob and Alice on the same curve
@@ -167,5 +142,9 @@ def public_key_generation():
     B_steps = bob_steps_public_gen()
     print("Alice steps= ", A_steps)    
     print("Bob steps= ", B_steps)
+    return A_steps, B_steps
+
+def bob_private_key_generation():
+    E_bob, bob_private_P, bob_private_Q = 0
 
 public_key_generation()
