@@ -123,15 +123,17 @@ j_invariants_over_F(F)
 print(L)
 # Use the function to find valid 'a' and j-invariant values
 params, j_invariants = find_valid_a()
-a_param = params[16][0]
-b_param = params[16][1]
+a_param = params[0][0]
+b_param = params[0][1]
 E = EllipticCurve(F, (a_param, b_param))
 # Output the result
 print("Знайдені параметри ", params)
 print("j-інваріанти кривої:", j_invariants)
 print("Count of j-invariants: ", len(j_invariants))
 
-print("kernel of isogeny ", kernel_of_isogeny(E, 5))
+ker_2 = kernel_of_isogeny(E, 2)
+print("kernel of isogeny ", ker_2)
+
 #print("Curve is supersingular? ", is_supersingular_curve((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
 #print("Computed j-invariant for ker[3]: ", j_invariant((a_param*ker_3[0][0] - 6 * (ker_3[0][0])**2+6)*ker_3[0][0], b_param))
 
@@ -144,3 +146,5 @@ def find_j_inv_for_particular_curve(a_param, b_param):
         else: 
             continue
     return -1
+
+print(find_j_inv_for_particular_curve(2*(1-2*(ker_2[1][0])**2), b_param)) 

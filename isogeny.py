@@ -40,7 +40,7 @@ def isogenies():
     total_nodes = len(params)
     for index, param in enumerate(params):
         j_inv = j_invariant(param[0], param[1])
-        nodes[str(j_inv)] = single_isogeny_graph_n(param[0], param[1], j_inv, 3, index, total_nodes)
+        nodes[str(j_inv)] = single_isogeny_graph_n(param[0], param[1], j_inv, 9, index, total_nodes)
          
     print(nodes)
     print(len(nodes))

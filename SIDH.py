@@ -56,25 +56,6 @@ def compute_isogeny_step(E, S_a, P_B, Q_B, doublings, target_order=2):
     return E_new, S_a_new, P_B_new, Q_B_new
 
 
-def multi_isogeny_steps(E_start, S_a_start, P_B_start, Q_B_start):
-    # Step 1: Compute φ0 with three doublings
-    print("Computing φ0:")
-    E_a1, S_a_prime, P_B_prime, Q_B_prime = compute_isogeny_step(E_start, S_a_start, P_B_start, Q_B_start, doublings=3)
-    
-    # Step 2: Compute φ1 with two doublings
-    print("Computing φ1:")
-    E_a2, S_a_prime, P_B_prime, Q_B_prime = compute_isogeny_step(E_a1, S_a_prime, P_B_prime, Q_B_prime, doublings=2)
-    
-    # Step 3: Compute φ2 with one doubling
-    print("Computing φ2:")
-    E_a3, S_a_prime, P_B_prime, Q_B_prime = compute_isogeny_step(E_a2, S_a_prime, P_B_prime, Q_B_prime, doublings=1)
-    
-    # Step 4: Compute φ3 without additional doublings (S_a_prime should already have order 2)
-    print("Computing φ3:")
-    E_a4, S_a_prime, P_B_prime, Q_B_prime = compute_isogeny_step(E_a3, S_a_prime, P_B_prime, Q_B_prime, doublings=0)
-    
-    return E_a4, S_a_prime, P_B_prime, Q_B_prime
-
 
 def compute_step(E, k, order):
     print(E.a4())
@@ -130,7 +111,7 @@ def alice_step_public_gen():
     steps.append(E_A_a1_j_3)
 
     final_E_alice, alice_public_p, alice_public_q = public_params_generator(E_A_a1_3.a4())
-    alice_PK = E_alice, alice_public_p, alice_public_q
+    alice_PK = E_alice.a4(), alice_public_p, alice_public_q
     return steps, alice_PK
 
 
@@ -175,7 +156,7 @@ def bob_steps_public_gen():
     steps.append(E_A_a1_j_3) 
 
     final_E_bob, bob_public_p, bob_public_q = public_params_generator(E_A_a1_3.a4())
-    bob_PK = E_bob, bob_public_p, bob_public_q
+    bob_PK = E_bob.a4(), bob_public_p, bob_public_q
 
     return steps, bob_PK
 

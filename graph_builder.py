@@ -15,8 +15,8 @@ steps = {
     '49*a + 112': {'pos': (689, 848), 'connections': ['86*a + 227', '66*a + 39', '8']},
 }
 
-#nodes_list = [nodes_5, nodes_3, nodes_2, steps]
-nodes_list = [nodes_2, steps]
+nodes_list = [nodes_5, nodes_3, nodes_2]
+#nodes_list = [nodes_2, steps]
 
 scroll_offset_x, scroll_offset_y = 0, 0
 
@@ -55,7 +55,7 @@ def draw_nodes():
 def draw_connections():
     """Draw lines between connected nodes, with scaling and scrolling."""
     i = 0
-    colour_list = [rl.RED, rl.BLUE, rl.GREEN, rl.BLACK]
+    colour_list = [rl.RED, rl.BLUE, rl.GREEN, rl.BLACK, rl.PURPLE]
     for nodes in nodes_list:
         for node, data in nodes.items():
             # Scale and apply scroll offsets to the start node position
