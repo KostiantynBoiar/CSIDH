@@ -33,7 +33,10 @@ def find_point_of_order(curve, order):
 
 def compute_step(E, k, order):
     print(E.a4())
-    E_C, P_C, Q_C = public_params_generator(E.a4())
+    try:
+        E_C, P_C, Q_C = public_params_generator(E.a4())
+    except:
+        E_C, P_C, Q_C = public_params_generator(E)
     k_Q = k * Q_C
     S = P_C + k_Q
     if S.order() != order:
@@ -144,7 +147,28 @@ def public_key_generation():
     print("Bob steps= ", B_steps)
     return A_steps, B_steps
 
-def bob_private_key_generation():
-    E_bob, bob_private_P, bob_private_Q = 0
+def private_key_generation(A_steps, name, k_lists):
+    steps = []
+    first_EC = EllipticCurve(F, A_steps[1][0], 1)
+    buffer_EC = 0
+    for i in range(len(k_lists)):
+        if i == 0:
+            S_A_isogeny, E_A_a1, E_A_a1_j = compute_step(first_EC, k_lists[i], 2)
+            print(f'{name}: Isogeny phi{i} = {S_A_isogeny},\n EC_phi{i} = {E_A_a1},\n j-inv_phi{i} = {E_A_a1_j}')
+            steps.append(E_A_a1_j)
+            buffer_EC = E_A_a1
+        else:
+            S_A_isogeny, E_A_a1, E_A_a1_j = compute_step(buffer_EC, k_lists[i], 2)
+            buffer_EC = E_A_a1
+            print(f'{name}: Isogeny phi{i} = {S_A_isogeny},\n EC_phi{i} = {E_A_a1},\n j-inv_phi{i} = {E_A_a1_j}')
+            steps.append(E_A_a1_j)
 
-public_key_generation()
+    return steps
+
+if __name__ == '__main__':
+    
+    A_PK_EC, B_PK_EC = public_key_generation()
+    B_steps = private_key_generation(A_PK_EC, "Bob", [2,5,9,3])
+    A_steps = private_key_generation(B_PK_EC, "Alice", [11,8,4,2])
+    print(B_steps)
+    print(A_steps)
